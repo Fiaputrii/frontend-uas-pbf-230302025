@@ -1,61 +1,151 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+## 🖥️ Setup Backend (CodeIgniter)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+### 1. Clone Repo Backend
+bash
+git clone https://github.com/fasshashaa/Perwalian-Backend.git (nama folder)
 
-## About Laravel
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### 2. Install Dependency CodeIgniter
+bash
+composer install
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 3. Menjalankan CodeIgniter
+bash
+php spark serve
 
-## Learning Laravel
+### 4. Cek Endpoint
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## 🖥️ Setup Frontend (Laravel)
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 1. Melalui terminal/cmd
+bash
+composer create-project laravel/laravel (nama-projek)
 
-## Laravel Sponsors
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### 2. Melalui Laragon
+- Buka Laragon
+- Klik kanan Quick app
+- Laravel
 
-### Premium Partners
+### 3. Install Dependency Laravel
+bash
+Composer install
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
 
-## Contributing
+### 4. Menjalankan Laravel
+bash
+php artisan serve
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
 
-## Code of Conduct
+# 📅 Tahapan Pembuatan Frontend
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Controller
+bash
+php artisan make:controller nama_fileController / php artisan make:model nama-file -mcr
 
-## Security Vulnerabilities
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Contoh MahasiswaController
+bash
+<?php
 
-## License
+namespace App\Http\Controllers;
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+
+class MahasiswaController extends Controller
+{
+    
+    /** Base URL API, diambil dari .env */
+    protected string $api;
+
+    public function __construct()
+    {
+        $this->api = rtrim(env('API_URL', 'http://localhost:8080'), '/');
+    }
+
+    /**
+     * Tampilkan daftar mahasiswa (dengan paging manual).
+     */
+    public function index(Request $request)
+    {
+        // Ambil seluruh data dari API
+        $res = Http::get("{$this->api}/vmahasiswa");
+        if (! $res->successful()) {
+            abort(502, 'Gagal mengambil data dari server eksternal.');
+        }
+
+        $all = $res->json(); // array of mahasiswa
+        // paging sederhana: page? per_page?
+        $perPage = 10;
+        $page    = max(1, (int) $request->query('page', 1));
+        $slice   = array_slice($all, ($page - 1) * $perPage, $perPage);
+        $total   = count($all);
+        $last    = ceil($total / $perPage);
+
+        return view('dosenwali.mahasiswa.index', [
+            'mahasiswa' => $slice,
+            'page'      => $page,
+            'last'      => $last,
+        ]);
+    }
+
+    /**
+     * Tampilkan detail satu mahasiswa berdasarkan NIM.
+     */
+    public function show(string $nim)
+    {
+        $res = Http::get("{$this->api}/vmahasiswa/{$nim}");
+        if ($res->status() === 404) {
+            abort(404, "Mahasiswa dengan NIM {$nim} tidak ditemukan.");
+        }
+        if (! $res->successful()) {
+            abort(502, 'Gagal mengambil data detail dari server eksternal.');
+        }
+
+        $m = $res->json(); // associative array
+        return view('mahasiswa.show', compact('m'));
+    }
+}
+
+
+## View
+bash
+php artisan make:view nama_file
+
+
+### Contoh index.blade.php
+bash
+@extends('layouts.app')
+@section('content')
+<h2>Daftar Mahasiswa</h2>
+
+<table>
+  <tr>
+    <th>NIM</th><th>Nama</th><th>Email</th><th>Detail</th>
+  </tr>
+  @foreach($mahasiswa as $m)
+    <tr>
+      <td>{{ $m['nim'] }}</td>
+      <td>{{ $m['nama_mahasiswa'] }}</td>
+      <td>{{ $m['email'] }}</td>
+      <td>
+        <a href="{{ route('mahasiswa.show', $m['nim']) }}">Lihat</a>
+      </td>
+    </tr>
+  @endforeach
+</table>
+
+{{-- Pagination --}}
+<div>
+  @if($page > 1)
+    <a href="{{ route('mahasiswa.index', ['page'=>$page-1]) }}">« Prev</a>
+  @endif
+  Halaman {{ $page }} dari {{ $last }}
+  @if($page < $last)
+    <a href="{{ route('mahasiswa.index', ['page'=>$page+1]) }}">Next »</a>
+  @endif
+</div>
+@endsection
