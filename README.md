@@ -1,18 +1,21 @@
 ## 🖥️ Setup Backend (CodeIgniter)
 
 ### 1. Clone Repo Backend
-bash
+```bash
 git clone https://github.com/fasshashaa/Perwalian-Backend.git (nama folder)
+```
 
 
 ### 2. Install Dependency CodeIgniter
-bash
+```bash
 composer install
+```
 
 
 ### 3. Menjalankan CodeIgniter
-bash
+```bash
 php spark serve
+```
 
 ### 4. Cek Endpoint
 
@@ -20,8 +23,9 @@ php spark serve
 ## 🖥️ Setup Frontend (Laravel)
 
 ### 1. Melalui terminal/cmd
-bash
+```bash
 composer create-project laravel/laravel (nama-projek)
+```
 
 
 ### 2. Melalui Laragon
@@ -30,24 +34,27 @@ composer create-project laravel/laravel (nama-projek)
 - Laravel
 
 ### 3. Install Dependency Laravel
-bash
+```bash
 Composer install
+```
 
 
 ### 4. Menjalankan Laravel
-bash
+```bash
 php artisan serve
+```
 
 
 # 📅 Tahapan Pembuatan Frontend
 
 ## Controller
-bash
+```bash
 php artisan make:controller nama_fileController / php artisan make:model nama-file -mcr
+```
 
 
 ### Contoh MahasiswaController
-bash
+```bash
 <?php
 
 namespace App\Http\Controllers;
@@ -109,15 +116,17 @@ class MahasiswaController extends Controller
         return view('mahasiswa.show', compact('m'));
     }
 }
+```
 
 
 ## View
-bash
+```bash
 php artisan make:view nama_file
+```
 
 
 ### Contoh index.blade.php
-bash
+```bash
 @extends('layouts.app')
 @section('content')
 <h2>Daftar Mahasiswa</h2>
@@ -149,3 +158,4 @@ bash
   @endif
 </div>
 @endsection
+```
